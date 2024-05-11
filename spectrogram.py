@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 # for opening the media file
 import scipy.io.wavfile as wavfile
 
-Fs, aud = wavfile.read('dev.wav')
+Fs, aud = wavfile.read('car.wav')
 # select left channel only
 aud = aud[:,0]
 # trim the first 125 seconds
