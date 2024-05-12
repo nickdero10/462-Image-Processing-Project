@@ -5,14 +5,13 @@ import matplotlib.pyplot as plt
 from scipy.io import wavfile
 import pygame
 
-def play_waveform(wave):
-    # Create Sound object from waveform
-    audio = pygame.mixer.Sound(buffer=wave.tobytes())
+pygame.mixer.init()
 
-    # Play the Sound object
-    audio.play()
+globalWave = None 
+Fs = 24000
 
 def generate_spectrogram(freq):
+    global globalWave, Fs
     plt.close()
 
     # Resize image to match desired dimensions
@@ -34,7 +33,7 @@ def generate_spectrogram(freq):
 
     # Generate random phase data
     phase = np.random.randn(800, 400)
-    phase *= freq
+    phase *= (freq * 100000)
     phase = np.exp(1j * phase)
 
     # Resize phase to match image dimensions
@@ -62,27 +61,29 @@ def generate_spectrogram(freq):
     # Create 2-channel waveform
     wave = np.array([scaled, scaled]).T.astype(np.int16)
 
-    Fs = 24000
+    # Update the sampling frequency based on the slider value
+    Fs = int(24000 * (freq / 20))
 
-    aud = wave[:,0]
+    globalWave = wave
 
-    # trim the first 125 seconds
-    first = aud[:int(Fs*125)]
-
-    powerSpectrum, frequenciesFound, time, imageAxis = plt.specgram(first, Fs=Fs, vmin=scale.get(), vmax=100)
-
-    # Orient Correctly
-    updown = np.transpose(powerSpectrum)
-    flipped_spectrum = np.flipud(updown)
-
-    # Display the flipped spectrogram
-    #plt.imshow(flipped_spectrum, aspect='auto', extent=[time[0], time[-1], frequenciesFound[0], frequenciesFound[-1]])
-    plt.specgram(wave[:, 0], Fs=24000, vmin=scale.get(), vmax=40)
+    # Display the Spectrogram
+    plt.specgram(wave[:, 0], Fs=Fs, vmin=scale.get(), vmax=40)
     plt.xlabel('Frequency (Hz)')
     plt.ylabel('Time (s)')
     plt.title('Spectrogram')
     plt.colorbar(label='Power/Frequency (dB/Hz)')
     plt.show()
+
+    globalWave = wave
+
+def play_waveform():
+    global globalWave, Fs
+
+    # Create Sound object from waveform
+    audio = pygame.mixer.Sound(buffer=globalWave.tobytes())
+
+    # Play the .wav audio
+    audio.play()
 
 # Initialize Tkinter window
 root = Tk()
@@ -102,7 +103,7 @@ generate_button = Button(root, text="Generate Spectrogram", command=lambda: gene
 generate_button.pack()
 
 # Create a button to generate the spectrogram
-generate_button = Button(root, text="Generate Spectrogram", command=lambda: generate_spectrogram(scale.get()))
+generate_button = Button(root, text="Play .wav File", command=play_waveform)
 generate_button.pack()
 
 # Run the Tkinter event loop
