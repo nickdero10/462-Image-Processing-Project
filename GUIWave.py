@@ -3,6 +3,14 @@ from PIL import Image
 from tkinter import filedialog, Tk, Scale, Button, HORIZONTAL
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
+import pygame
+
+def play_waveform(wave):
+    # Create Sound object from waveform
+    audio = pygame.mixer.Sound(buffer=wave.tobytes())
+
+    # Play the Sound object
+    audio.play()
 
 def generate_spectrogram(freq):
     plt.close()
@@ -68,7 +76,8 @@ def generate_spectrogram(freq):
     flipped_spectrum = np.flipud(updown)
 
     # Display the flipped spectrogram
-    plt.imshow(flipped_spectrum, aspect='auto', extent=[time[0], time[-1], frequenciesFound[0], frequenciesFound[-1]])
+    #plt.imshow(flipped_spectrum, aspect='auto', extent=[time[0], time[-1], frequenciesFound[0], frequenciesFound[-1]])
+    plt.specgram(wave[:, 0], Fs=24000, vmin=scale.get(), vmax=40)
     plt.xlabel('Frequency (Hz)')
     plt.ylabel('Time (s)')
     plt.title('Spectrogram')
@@ -80,13 +89,17 @@ root = Tk()
 root.title("Frequency Slider")
 
 # Create a scale (slider) widget
-scale = Scale(root, from_=0, to=100, orient=HORIZONTAL, label="Frequency", command=generate_spectrogram)
-scale.set(50)  # Set initial frequency
+scale = Scale(root, from_=1, to=40, orient=HORIZONTAL, label="Frequency", command=generate_spectrogram)
+scale.set(20)  # Set initial frequency
 scale.pack()
 
 # Load image
 image_path = filedialog.askopenfilename(title="Select Image", filetypes=[("Image files", "*.jpg;*.png;*.jpeg")])
 data = Image.open(image_path)
+
+# Create a button to generate the spectrogram
+generate_button = Button(root, text="Generate Spectrogram", command=lambda: generate_spectrogram(scale.get()))
+generate_button.pack()
 
 # Create a button to generate the spectrogram
 generate_button = Button(root, text="Generate Spectrogram", command=lambda: generate_spectrogram(scale.get()))
