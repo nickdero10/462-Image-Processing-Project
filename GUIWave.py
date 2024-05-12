@@ -81,7 +81,7 @@ def play_waveform():
 
     # Create Sound object from waveform
     audio = pygame.mixer.Sound(buffer=globalWave.tobytes())
-
+    pygame.mixer.stop()  # Stop any currently playing sounds
     # Play the .wav audio
     audio.play()
 
