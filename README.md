@@ -27,11 +27,11 @@
 
 
 ## Group Contributions
-John
+####John
 * GUI state functionality/visual additions, event logging and handling, troubleshooting Spectrogram and GUI code
 * Attempted Visual Studio Implementation/OpenCV implementation in python, not functional enough to be submitted
 * README/REPORT
-Nick
+####Nick
 * Project Idea
 * Initial Spectrogram Code, GUI and troubleshooting
 * Spectrogram Code and GUI base logic
