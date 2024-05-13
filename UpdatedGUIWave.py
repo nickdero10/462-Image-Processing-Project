@@ -2,7 +2,6 @@ import numpy as np
 from PIL import Image
 from tkinter import filedialog, Tk, Scale, Button, HORIZONTAL, Label, messagebox
 import matplotlib.pyplot as plt
-from scipy.io import wavfile
 import pygame
 import logging
 
@@ -14,7 +13,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 globalWave = None 
 Fs = 24000
-data = None  # Initialize data as None to ensure it's checked
+data = None  # Initialize data as None to ensure it's checked before usage
 
 def generate_spectrogram(freq):
     global globalWave, Fs, data
@@ -24,7 +23,7 @@ def generate_spectrogram(freq):
         return
     
     logging.info(f"Generating spectrogram with frequency: {freq}")
-
+    
     plt.close()
 
     # Process the image
@@ -34,7 +33,7 @@ def generate_spectrogram(freq):
     grayscale /= np.max(grayscale)
     flipped = np.flip(grayscale, axis=0)
 
-    # Manipulate the image data for spectrogram generation
+    # Generate and process phase data
     phase = np.random.randn(800, 400) * (freq * 100000)
     phase = np.exp(1j * phase)
     phase = np.resize(phase, (800, 400))
@@ -59,9 +58,10 @@ def generate_spectrogram(freq):
     plt.show()
 
 def play_waveform():
-    global globalWave, Fs
-    if globalWave is None:
+    global globalWave, Fs, data
+    if data is None or globalWave is None:
         logging.error("No waveform loaded. Cannot play audio.")
+        messagebox.showerror("Error", "No waveform loaded. Please generate a spectrogram first.")
         return
     
     logging.info("Playing waveform.")
@@ -70,6 +70,12 @@ def play_waveform():
     audio.play()
 
 def stop_waveform():
+    global globalWave, data
+    if data is None or globalWave is None:
+        logging.error("No waveform loaded. Cannot stop audio.")
+        messagebox.showerror("Error", "No waveform loaded. Cannot stop audio.")
+        return
+
     logging.info("Stopping audio playback.")
     pygame.mixer.stop()
 
@@ -80,10 +86,10 @@ root.geometry("300x200")
 
 def load_image():
     global data
-    image_path = filedialog.askopenfilename(title="Select Image", filetypes=[("Image files", "*.jpg;*.png;*.jpeg")])
-    if image_path:
-        data = Image.open(image_path)
-        logging.info(f"Image loaded: {image_path}")
+    file_path = filedialog.askopenfilename(title="Select Image", filetypes=[("Image files", "*.jpg;*.png;*.jpeg")])
+    if file_path:
+        data = Image.open(file_path)
+        logging.info(f"Image loaded: {file_path}")
     else:
         logging.info("Image loading canceled.")
 
